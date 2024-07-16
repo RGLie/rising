@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../model/screen_provider.dart';
 
 class MyCard extends StatelessWidget {
-  const MyCard({super.key});
+  final String text;
+
+  const MyCard({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
+
+    final screenProvider = Provider.of<ScreenProvider>(context);
+
+
+
     return Container(
       width: 400,
       child: Card(
@@ -21,7 +31,9 @@ class MyCard extends StatelessWidget {
           ),
           // splashColor: myColor.background,
           onTap: () {
-            Navigator.pop(context);
+            screenProvider.setMyCardClicked();
+            screenProvider.setMyCardText(text);
+
             // Navigator.push(
             //     context,
             //     MaterialPageRoute(
@@ -33,7 +45,7 @@ class MyCard extends StatelessWidget {
             child: ListTile(
 
               title: Text(
-                'bbbbbb',
+                text,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16,
@@ -41,7 +53,7 @@ class MyCard extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                'aaaaaa',
+                '2029년 2월 3일',
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontSize: 14,

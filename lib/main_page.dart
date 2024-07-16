@@ -1,25 +1,79 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:madcamp_week3/home_page.dart';
+import 'package:madcamp_week3/model/user_provider.dart';
 import 'package:madcamp_week3/my_page.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
 
 import 'ball_simulation_2.dart';
+import 'model/screen_provider.dart';
 import 'object/moon.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+
+class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin  {
   final _idController = TextEditingController();
   final _contentController = TextEditingController();
   final _pwController = TextEditingController();
+  bool _isChecked = true;
 
   DateTime? newdate = DateTime.now();
 
 
+  late AnimationController _fadecontroller;
+  late Animation<double> _fadeanimation;
+  bool _isFadeClicked = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+
+    _fadecontroller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )
+      ..addListener(() {
+        setState(() {});
+      });
+    _fadeanimation =
+        Tween<double>(begin: 0.0, end: 15.0).animate(CurvedAnimation(
+          parent: _fadecontroller,
+          curve: Curves.easeOut,
+        ));
+
+    final sp = Provider.of<ScreenProvider>(context, listen: false);
+    sp.addListener(() {
+      if(sp.isClicked){
+        _fadecontroller.forward(from: 0.0);
+      }
+      else{
+        _fadecontroller.reverse();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadecontroller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final screenProvider = Provider.of<ScreenProvider>(context);
+
+
     return Scaffold(
 
       body: Container(
@@ -50,6 +104,68 @@ class MainPage extends StatelessWidget {
                   child: Moon()
               ),
               PhysicsDemo(),
+
+              if (_fadecontroller.value > 0)
+                GestureDetector(
+                  onTap: (){
+                    screenProvider.setNoClicked();
+                  },
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: double.maxFinite,
+                        height: double.maxFinite,
+                        color: Colors.black.withOpacity(_fadeanimation.value/45),
+                      ),
+
+                      Center(
+                        child: ClipRect(
+                          child: OverflowBox(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(
+                                sigmaX: _fadeanimation.value,
+                                sigmaY: _fadeanimation.value,
+                              ),
+                              child: Container(
+                                width: double.maxFinite,
+                                height: double.maxFinite,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  // color: Colors.black.withOpacity(0.1),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Center(
+                          child: Center(
+                              child: Container(
+                                  width: MediaQuery.of(context).size.width*0.85,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('우리는 답을 찾을 것이다, 언제나 그랬듯이.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 55, fontFamily: 'GowunBatang',
+                                        ),
+                                      ),
+                                      SizedBox(height: 10,),
+                                      Text('We will find a way, we always have.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 40, fontFamily: 'GowunBatang',
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                              )
+                          )
+                      )
+                    ]
+                  ),
+                ),
 
             ],
           )
@@ -94,6 +210,8 @@ class MainPage extends StatelessWidget {
               child: FloatingActionButton(
                 heroTag: 'add',
                 onPressed: () {
+
+
                   showGeneralDialog(
                       context: context,
                       barrierDismissible: true,
@@ -127,87 +245,130 @@ class MainPage extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                content: Container(
-                                  height: 150,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                content: StatefulBuilder(
+                                  builder: (BuildContext context, StateSetter setState) {
+                                    return Container(
+                                      height: 180,
+                                      child: Column(
                                         children: [
-                                          Icon(Icons.calendar_month_outlined, color: Colors.white, size: 17,),
-                                          SizedBox(width: 8,),
-                                          InkWell(
-                                            onTap: () async{
-                                              newdate = await showDatePicker(
-                                                context: context,
-                                                initialDate: DateTime.now(),
-                                                firstDate: DateTime(1900),
-                                                lastDate: DateTime(2100),
-                                              );
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.calendar_month_outlined, color: Colors.white, size: 17,),
+                                              SizedBox(width: 8,),
+                                              InkWell(
+                                                onTap: () async{
+                                                  newdate = await showDatePicker(
+                                                    context: context,
+                                                    initialDate: DateTime.now(),
+                                                    firstDate: DateTime(1900),
+                                                    lastDate: DateTime(2100),
+                                                  );
 
-                                              if(newdate == null){
-                                                return;
-                                              }
-                                              else{
+                                                  if(newdate == null){
+                                                    return;
+                                                  }
+                                                  else{
 
-                                              }
+                                                  }
 
-                                            },
-                                            child: Text(DateFormat("yyyy년 MM월 dd일").format(newdate!),
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 14
+                                                },
+                                                child: Text(DateFormat("yyyy년 MM월 dd일").format(newdate!),
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 14
+                                                  ),
+                                                ),
                                               ),
+
+
+
+                                            ],
+                                          ),
+
+                                          SizedBox(height: 15,),
+
+                                          TextFormField(
+                                            controller: _contentController,
+                                            minLines: 3,
+                                            maxLines: 3,
+                                            keyboardType: TextInputType.multiline,
+                                            cursorColor: Colors.white,
+                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+                                            decoration: InputDecoration(
+                                              // icon: Icon(Icons.note_add_outlined),
+                                              //   suffixIcon: Icon(Icons.account_circle_outlined, color: Colors.white,),
+                                                fillColor: Colors.transparent,
+                                                isDense: true,
+                                                contentPadding: EdgeInsets.all(15),
+                                                filled: true,
+                                                enabledBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.all(
+                                                    Radius.circular(15),
+                                                  ),
+                                                  borderSide: BorderSide(color:Colors.white, width: 0),
+                                                ),
+                                                // helperText: '',
+                                                hintText: '내용을 입력하세요',
+                                                floatingLabelStyle: TextStyle(color:Colors.white),
+                                                hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                                                labelText: '내용',
+                                                labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
+                                                focusedBorder: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                                                  borderSide: BorderSide(
+                                                      color: Colors.white, width: 1.5),
+                                                )
                                             ),
+                                            validator: (value) {
+                                              if (value!.isEmpty) {
+                                                return "내용을 입력해주세요";
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+
+
+                                              SizedBox(
+                                                height:30,
+                                                child: FittedBox(
+                                                  fit: BoxFit.fill,
+                                                  child: Switch(
+                                                    value: _isChecked,
+                                                    activeTrackColor: Colors.transparent,
+                                                    inactiveTrackColor: Colors.transparent,
+                                                    trackOutlineColor: MaterialStateProperty.all<Color>(Colors.white),
+                                                    trackOutlineWidth: MaterialStateProperty.all(0.5),
+                                                    inactiveThumbColor: Colors.white.withOpacity(0.5),
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        _isChecked = value;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: 10,),
+                                              Text(_isChecked?'공개':'비공개',
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14
+                                                ),
+                                              ),
+                                            ],
                                           ),
 
                                         ],
                                       ),
-
-                                      SizedBox(height: 15,),
-
-                                      TextFormField(
-                                        controller: _contentController,
-                                        minLines: 3,
-                                        maxLines: 3,
-                                        keyboardType: TextInputType.multiline,
-                                        cursorColor: Colors.white,
-                                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
-                                        decoration: InputDecoration(
-                                          // icon: Icon(Icons.note_add_outlined),
-                                          //   suffixIcon: Icon(Icons.account_circle_outlined, color: Colors.white,),
-                                            fillColor: Colors.transparent,
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.all(15),
-                                            filled: true,
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                Radius.circular(15),
-                                              ),
-                                              borderSide: BorderSide(color:Colors.white, width: 0),
-                                            ),
-                                            // helperText: '',
-                                            hintText: '내용을 입력하세요',
-                                            floatingLabelStyle: TextStyle(color:Colors.white),
-                                            hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                                            labelText: '내용',
-                                            labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(Radius.circular(15)),
-                                              borderSide: BorderSide(
-                                                  color: Colors.white, width: 1.5),
-                                            )
-                                        ),
-                                        validator: (value) {
-                                          if (value!.isEmpty) {
-                                            return "내용을 입력해주세요";
-                                          }
-                                          return null;
-                                        },
-                                      ),
-
-                                    ],
-                                  ),
+                                    );
+                                  }
                                 ),
                                 actionsAlignment: MainAxisAlignment.center,
                                 actions: <Widget>[
@@ -255,6 +416,11 @@ class MainPage extends StatelessWidget {
                     return FloatingActionButton(
                       heroTag: 'login',
                       onPressed: () {
+
+
+
+
+
                         if(true){
                           Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: MyPage()));
                         }
@@ -422,8 +588,19 @@ class MainPage extends StatelessWidget {
                                             child: new Text("로그인", style: TextStyle(color: Colors.white),),
                                             style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.transparent),
-                                            onPressed: () {
-                                              Navigator.pop(context);
+                                            onPressed: () async{
+                                              try {
+                                                bool isToken = await userProvider.login(_idController.text, _pwController.text);
+                                                await userProvider.storeToken();
+
+                                                if (userProvider.isTokenExpired()) {
+                                                  print('Token is expired');
+                                                } else {
+                                                  print('Token is valid');
+                                                }
+                                              } catch (e) {
+                                                print('Error: $e');
+                                              }
                                             },
                                           ),
                                           new ElevatedButton(
@@ -641,46 +818,46 @@ class MainPage extends StatelessWidget {
                           },
                         ),
 
-                        SizedBox(height: 15,),
-                        TextFormField(
-                          controller: _regiNAMEController,
-                          minLines: 1,
-                          maxLines: 1,
-                          keyboardType: TextInputType.name,
-                          cursorColor: Colors.white,
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
-                          decoration: InputDecoration(
-                            // icon: Icon(Icons.note_add_outlined),
-                              suffixIcon: Icon(Icons.person_outlined, color: Colors.white,),
-                              fillColor: Colors.transparent,
-                              isDense: true,
-                              contentPadding: EdgeInsets.all(15),
-                              filled: true,
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(15),
-                                ),
-                                borderSide: BorderSide(color:Colors.white, width: 0),
-                              ),
-                              // helperText: '',
-                              hintText: '이름을 입력하세요',
-                              floatingLabelStyle: TextStyle(color:Colors.white),
-                              hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                              labelText: '이름',
-                              labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(15)),
-                                borderSide: BorderSide(
-                                    color: Colors.white, width: 1.5),
-                              )
-                          ),
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return "이름을 입력해주세요";
-                            }
-                            return null;
-                          },
-                        ),
+                        // SizedBox(height: 15,),
+                        // TextFormField(
+                        //   controller: _regiNAMEController,
+                        //   minLines: 1,
+                        //   maxLines: 1,
+                        //   keyboardType: TextInputType.name,
+                        //   cursorColor: Colors.white,
+                        //   style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+                        //   decoration: InputDecoration(
+                        //     // icon: Icon(Icons.note_add_outlined),
+                        //       suffixIcon: Icon(Icons.person_outlined, color: Colors.white,),
+                        //       fillColor: Colors.transparent,
+                        //       isDense: true,
+                        //       contentPadding: EdgeInsets.all(15),
+                        //       filled: true,
+                        //       enabledBorder: OutlineInputBorder(
+                        //         borderRadius: BorderRadius.all(
+                        //           Radius.circular(15),
+                        //         ),
+                        //         borderSide: BorderSide(color:Colors.white, width: 0),
+                        //       ),
+                        //       // helperText: '',
+                        //       hintText: '이름을 입력하세요',
+                        //       floatingLabelStyle: TextStyle(color:Colors.white),
+                        //       hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                        //       labelText: '이름',
+                        //       labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
+                        //       focusedBorder: OutlineInputBorder(
+                        //         borderRadius: BorderRadius.all(Radius.circular(15)),
+                        //         borderSide: BorderSide(
+                        //             color: Colors.white, width: 1.5),
+                        //       )
+                        //   ),
+                        //   validator: (value) {
+                        //     if (value!.isEmpty) {
+                        //       return "이름을 입력해주세요";
+                        //     }
+                        //     return null;
+                        //   },
+                        // ),
                         SizedBox(height: 15,),
                         TextFormField(
                           controller: _regiEMAILController,
