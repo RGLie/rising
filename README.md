@@ -34,13 +34,13 @@ https://madcamp-week3-692b2.web.app/
 <br/>
 
 ## About
-**Home**
+**Home**<br/>
 <img width="30%" src="https://github.com/user-attachments/assets/f6b0c287-e4c5-4b0a-8d42-48e4f149199e"/>
 - 화면을 길게 누르면 메인 화면으로 진입합니다.
 <br/>
 <br/>
 
-**Main**
+**Main**<br/>
 <img width="30%" src="https://github.com/user-attachments/assets/cbbf42f2-56b6-4698-87b8-12412ee74589"/>
 <img width="30%" src="https://github.com/user-attachments/assets/61c4fc4d-5aea-4a8c-837e-de09c69cbe47"/>
 - 떠다니는 불빛에 마우스를 가져다대면 색이 짙어지며 밀려납니다.
@@ -50,7 +50,7 @@ https://madcamp-week3-692b2.web.app/
 <br/>
 <br/>
 
-**Add**
+**Add**<br/>
 <img width="30%" src="https://github.com/user-attachments/assets/c93cd617-9445-493e-9197-496036d610fa"/>
 
 - 행복했던 순간을 기록할 수 있습니다.
@@ -61,7 +61,7 @@ https://madcamp-week3-692b2.web.app/
 <br/>
 <br/>
 
-**My page**
+**My page**<br/>
 <img width="30%" src="https://github.com/user-attachments/assets/3c790c43-6a39-4540-a594-ca7d8d35f969"/>
 <img width="30%" src="https://github.com/user-attachments/assets/61c4fc4d-5aea-4a8c-837e-de09c69cbe47"/>
 <img width="30%" src="https://github.com/user-attachments/assets/61c4fc4d-5aea-4a8c-837e-de09c69cbe47"/>
