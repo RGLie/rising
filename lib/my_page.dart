@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:madcamp_week3/home_page.dart';
 import 'package:madcamp_week3/main_page.dart';
+import 'package:madcamp_week3/model/memo_provider.dart';
 import 'package:madcamp_week3/model/screen_provider.dart';
 import 'package:madcamp_week3/model/user_provider.dart';
 import 'package:madcamp_week3/object/home_moon.dart';
@@ -50,6 +51,13 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin{
         _fadecontroller.reverse();
       }
     });
+
+
+
+    final memos = Provider.of<MemoProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    memos.loadMyMemos(userProvider.token);
+
   }
 
   @override
@@ -63,6 +71,7 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin{
 
     final screenProvider = Provider.of<ScreenProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
+    final memoProvider = Provider.of<MemoProvider>(context);
 
 
     return Scaffold(
@@ -190,11 +199,12 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin{
 
                   ListView.builder(
                     shrinkWrap: true,
-                    itemCount: 3,
+                    itemCount: memoProvider.my_memo_lst.length,
                     itemBuilder: (context, index){
                       return Column(
                         children: [
-                          MyCard(text: "우와오아와오아"),
+                          MyCard(text: memoProvider.my_memo_lst[index].content,
+                            date:'${memoProvider.my_memo_lst[index].date.split('-')[0]}년 ${memoProvider.my_memo_lst[index].date.split('-')[1]}월 ${memoProvider.my_memo_lst[index].date.split('-')[2]}일',),
                           SizedBox(height: 20,),
                         ],
                       );
@@ -248,14 +258,14 @@ class _MyPageState extends State<MyPage> with SingleTickerProviderStateMixin{
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text('우와오아와오아',
+                                    Text(screenProvider.myCardText,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 55, fontFamily: 'GowunBatang',
                                       ),
                                     ),
                                     SizedBox(height: 10,),
-                                    Text('2029년 2월 3일',
+                                    Text(screenProvider.myCardDate,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 30, fontFamily: 'GowunBatang',

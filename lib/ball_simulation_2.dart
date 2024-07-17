@@ -3,6 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:madcamp_week3/constants/colors.dart';
+import 'package:madcamp_week3/model/memo_provider.dart';
+import 'package:madcamp_week3/model/screen_provider.dart';
+import 'package:madcamp_week3/model/user_provider.dart';
+import 'package:provider/provider.dart';
 
 class PhysicsDemo extends StatefulWidget {
   @override
@@ -27,9 +31,12 @@ class _PhysicsDemoState extends State<PhysicsDemo> with SingleTickerProviderStat
   late Animation<double> _animation;
   late List<Ball> balls;
 
+
+
   @override
   void initState() {
     super.initState();
+
     balls = [
       Ball(x: makeRandomStartPosition(), y: height, vx: makeRandomVelocityX(), vy: makeRandomVelocityY(), ax:0, ay:0, radius: makeRandomRadius(), color: Colors.red),
       Ball(x: makeRandomStartPosition(), y: height, vx: makeRandomVelocityX(), vy: makeRandomVelocityY(), ax:0, ay:0, radius: makeRandomRadius(), color: Colors.green),
@@ -123,6 +130,9 @@ class _PhysicsDemoState extends State<PhysicsDemo> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final screenProvider = Provider.of<ScreenProvider>(context);
+    final memoProvider = Provider.of<MemoProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
 
     return Center(
@@ -137,10 +147,10 @@ class _PhysicsDemoState extends State<PhysicsDemo> with SingleTickerProviderStat
             if(dist < pow(ball.radius, 2)*2){
               ball.isHover = true;
               if(newpos_x < ball.x){
-                ball.vx += 0.1;
+                ball.vx += 0.08;
               }
               else{
-                ball.vx -= 0.1;
+                ball.vx -= 0.08;
               }
             }
             else{
@@ -168,6 +178,9 @@ class _PhysicsDemoState extends State<PhysicsDemo> with SingleTickerProviderStat
             for(var ball in balls){
               if(ball.isHover){
                 ball.isClick = true;
+                screenProvider.setClicked();
+
+                
                 // _openAnimateDialog(context);
               }
             }

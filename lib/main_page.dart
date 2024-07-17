@@ -2,9 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:madcamp_week3/home_page.dart';
+import 'package:madcamp_week3/model/memo_provider.dart';
 import 'package:madcamp_week3/model/user_provider.dart';
 import 'package:madcamp_week3/my_page.dart';
 import 'package:page_transition/page_transition.dart';
@@ -52,6 +54,8 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
         ));
 
     final sp = Provider.of<ScreenProvider>(context, listen: false);
+    final mm = Provider.of<MemoProvider>(context, listen: false);
+    mm.getRandomMemo();
     sp.addListener(() {
       if(sp.isClicked){
         _fadecontroller.forward(from: 0.0);
@@ -72,6 +76,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final screenProvider = Provider.of<ScreenProvider>(context);
+    final memoProvider = Provider.of<MemoProvider>(context);
 
 
     return Scaffold(
@@ -109,6 +114,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                 GestureDetector(
                   onTap: (){
                     screenProvider.setNoClicked();
+                    memoProvider.getRandomMemo();
                   },
                   child: Stack(
                     children: [
@@ -145,14 +151,15 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text('우리는 답을 찾을 것이다, 언제나 그랬듯이.',
+                                      Text(memoProvider.randomMemo.content,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 55, fontFamily: 'GowunBatang',
                                         ),
                                       ),
                                       SizedBox(height: 10,),
-                                      Text('We will find a way, we always have.',
+                                      Text(
+                                        '${memoProvider.randomMemo.date.split('-')[0]}년 ${memoProvider.randomMemo.date.split('-')[1]}월 ${memoProvider.randomMemo.date.split('-')[2]}일',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Colors.white.withOpacity(_fadeanimation.value/15), fontSize: 40, fontFamily: 'GowunBatang',
@@ -210,190 +217,428 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
               child: FloatingActionButton(
                 heroTag: 'add',
                 onPressed: () {
-
-
-                  showGeneralDialog(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: '',
-                      transitionDuration: const Duration(milliseconds: 300),
-                      pageBuilder: (context, animation1, animation2){
-                        return Container();
-                      },
-                      transitionBuilder: (context, a1, a2, widget){
-                        return ScaleTransition(
-                          scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-                          child: FadeTransition(
-                              opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
-                              child: AlertDialog(
-                                backgroundColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: Colors.white,
-                                      width: 0.5
-                                  ),
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-
-                                //Dialog Main Title
-                                title: Column(
-                                  children: <Widget>[
-                                    new Text(
-                                      "작성하기",
-                                      style:
-                                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  if(userProvider.token == ""){
+                    showGeneralDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: '',
+                        transitionDuration: const Duration(milliseconds: 300),
+                        pageBuilder: (context, animation1, animation2){
+                          return Container();
+                        },
+                        transitionBuilder: (context, a1, a2, widget){
+                          return ScaleTransition(
+                            scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+                            child: FadeTransition(
+                                opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+                                child: AlertDialog(
+                                  backgroundColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Colors.white,
+                                        width: 0.5
                                     ),
-                                  ],
-                                ),
-                                content: StatefulBuilder(
-                                  builder: (BuildContext context, StateSetter setState) {
-                                    return Container(
-                                      height: 180,
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              Icon(Icons.calendar_month_outlined, color: Colors.white, size: 17,),
-                                              SizedBox(width: 8,),
-                                              InkWell(
-                                                onTap: () async{
-                                                  newdate = await showDatePicker(
-                                                    context: context,
-                                                    initialDate: DateTime.now(),
-                                                    firstDate: DateTime(1900),
-                                                    lastDate: DateTime(2100),
-                                                  );
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
 
-                                                  if(newdate == null){
-                                                    return;
-                                                  }
-                                                  else{
-
-                                                  }
-
-                                                },
-                                                child: Text(DateFormat("yyyy년 MM월 dd일").format(newdate!),
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14
-                                                  ),
+                                  //Dialog Main Title
+                                  title: Column(
+                                    children: <Widget>[
+                                      new Text(
+                                        "로그인",
+                                        style:
+                                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  content: Container(
+                                    height: 150,
+                                    child: Column(
+                                      children: [
+                                        TextFormField(
+                                          controller: _idController,
+                                          minLines: 1,
+                                          maxLines: 1,
+                                          keyboardType: TextInputType.multiline,
+                                          cursorColor: Colors.white,
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+                                          decoration: InputDecoration(
+                                            // icon: Icon(Icons.note_add_outlined),
+                                              suffixIcon: Icon(Icons.account_circle_outlined, color: Colors.white,),
+                                              fillColor: Colors.transparent,
+                                              isDense: true,
+                                              contentPadding: EdgeInsets.all(15),
+                                              filled: true,
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(15),
                                                 ),
+                                                borderSide: BorderSide(color:Colors.white, width: 0),
                                               ),
-
-
-
-                                            ],
+                                              // helperText: '',
+                                              hintText: '아이디를 입력하세요',
+                                              floatingLabelStyle: TextStyle(color:Colors.white),
+                                              hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                                              labelText: '아이디',
+                                              labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(Radius.circular(15)),
+                                                borderSide: BorderSide(
+                                                    color: Colors.white, width: 1.5),
+                                              )
                                           ),
-
-                                          SizedBox(height: 15,),
-
-                                          TextFormField(
-                                            controller: _contentController,
-                                            minLines: 3,
-                                            maxLines: 3,
-                                            keyboardType: TextInputType.multiline,
-                                            cursorColor: Colors.white,
-                                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
-                                            decoration: InputDecoration(
-                                              // icon: Icon(Icons.note_add_outlined),
-                                              //   suffixIcon: Icon(Icons.account_circle_outlined, color: Colors.white,),
-                                                fillColor: Colors.transparent,
-                                                isDense: true,
-                                                contentPadding: EdgeInsets.all(15),
-                                                filled: true,
-                                                enabledBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.all(
-                                                    Radius.circular(15),
-                                                  ),
-                                                  borderSide: BorderSide(color:Colors.white, width: 0),
+                                          validator: (value) {
+                                            if (value!.isEmpty) {
+                                              return "내용을 입력해주세요";
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        TextFormField(
+                                          controller: _pwController,
+                                          minLines: 1,
+                                          maxLines: 1,
+                                          keyboardType: TextInputType.multiline,
+                                          obscureText: true,
+                                          enableSuggestions: false,
+                                          autocorrect: false,
+                                          cursorColor: Colors.white,
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+                                          decoration: InputDecoration(
+                                            // icon: Icon(Icons.note_add_outlined),
+                                              suffixIcon: Icon(Icons.lock_outline, color: Colors.white,),
+                                              fillColor: Colors.transparent,
+                                              isDense: true,
+                                              contentPadding: EdgeInsets.all(15),
+                                              filled: true,
+                                              enabledBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(15),
                                                 ),
-                                                // helperText: '',
-                                                hintText: '내용을 입력하세요',
-                                                floatingLabelStyle: TextStyle(color:Colors.white),
-                                                hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
-                                                labelText: '내용',
-                                                labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
-                                                focusedBorder: OutlineInputBorder(
-                                                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                                                  borderSide: BorderSide(
-                                                      color: Colors.white, width: 1.5),
-                                                )
+                                                borderSide: BorderSide(color:Colors.white, width: 0),
+                                              ),
+                                              // helperText: '',
+                                              hintText: '패스워드를 입력하세요',
+                                              floatingLabelStyle: TextStyle(color:Colors.white),
+                                              hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                                              labelText: '패스워드',
+                                              labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
+                                              focusedBorder: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(Radius.circular(15)),
+                                                borderSide: BorderSide(
+                                                    color: Colors.white, width: 1.5),
+                                              )
+                                          ),
+                                          validator: (value) {
+                                            if (value!.isEmpty) {
+                                              return "패스워드를 입력해주세요";
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                        SizedBox(height: 8,),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text('계정이 없다면',
+                                              style: TextStyle(
+                                                  color: Colors.white60,
+                                                  fontSize: 12
+                                              ),
                                             ),
-                                            validator: (value) {
-                                              if (value!.isEmpty) {
-                                                return "내용을 입력해주세요";
-                                              }
-                                              return null;
-                                            },
-                                          ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-
-
-                                              SizedBox(
-                                                height:30,
-                                                child: FittedBox(
-                                                  fit: BoxFit.fill,
-                                                  child: Switch(
-                                                    value: _isChecked,
-                                                    activeTrackColor: Colors.transparent,
-                                                    inactiveTrackColor: Colors.transparent,
-                                                    trackOutlineColor: MaterialStateProperty.all<Color>(Colors.white),
-                                                    trackOutlineWidth: MaterialStateProperty.all(0.5),
-                                                    inactiveThumbColor: Colors.white.withOpacity(0.5),
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        _isChecked = value;
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(width: 10,),
-                                              Text(_isChecked?'공개':'비공개',
+                                            SizedBox(width: 5,),
+                                            InkWell(
+                                              onTap: (){
+                                                Navigator.pop(context);
+                                                _openAnimateDialog(context);
+                                              },
+                                              child: Text('회원가입',
                                                 style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: 14
+                                                    fontSize: 12
                                                 ),
                                               ),
+                                            ),
+                                            SizedBox(width: 5,),
+                                            Text('하세요.',
+                                              style: TextStyle(
+                                                  color: Colors.white60,
+                                                  fontSize: 12
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  actionsAlignment: MainAxisAlignment.center,
+                                  actions: <Widget>[
+                                    new ElevatedButton(
+                                      child: new Text("로그인", style: TextStyle(color: Colors.white),),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent),
+                                      onPressed: () async{
+                                        // try {
+                                        print('login cliicked');
+                                        bool isToken = await userProvider.login(_idController.text, _pwController.text);
+                                        // print(userProvider.token);
+
+                                        if(isToken){
+                                          Fluttertoast.showToast(
+                                              msg: "로그인에 성공하였습니다",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              webPosition: "center",
+                                              // backgroundColor: Colors.white,
+                                              webBgColor: "linear-gradient(to right, #4299f5, #4299f5, #4299f5)",
+                                              textColor: Colors.white,
+                                              fontSize: 16.0
+                                          );
+
+                                          Navigator.pop(context);
+                                          // Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: MyPage()));
+                                        }
+                                        else{
+                                          Fluttertoast.showToast(
+                                              msg: "로그인에 실패하였습니다",
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.CENTER,
+                                              timeInSecForIosWeb: 1,
+                                              webPosition: "center",
+                                              // backgroundColor: Colors.white,
+                                              webBgColor: "linear-gradient(to right, #f54242, #f54242, #f54242)",
+                                              textColor: Colors.white,
+                                              fontSize: 16.0
+                                          );
+                                        }
+                                        //   await userProvider.storeToken();
+                                        //
+                                        //   if (userProvider.isTokenExpired()) {
+                                        //     print('Token is expired');
+                                        //   } else {
+                                        //     Navigator.pop(context);
+                                        //     print('Token is valid');
+                                        //   }
+                                        // } catch (e) {
+                                        //   print('Error: $e');
+                                        // }
+                                      },
+                                    ),
+                                    new ElevatedButton(
+                                      child: new Text("닫기", style: TextStyle(color: Colors.white),),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                )
+                            ),
+                          );
+                        }
+                    );
+                  }
+                  else{
+
+                    showGeneralDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: '',
+                        transitionDuration: const Duration(milliseconds: 300),
+                        pageBuilder: (context, animation1, animation2){
+                          return Container();
+                        },
+                        transitionBuilder: (context, a1, a2, widget){
+                          return ScaleTransition(
+                            scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+                            child: FadeTransition(
+                                opacity: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
+                                child: AlertDialog(
+                                  backgroundColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Colors.white,
+                                        width: 0.5
+                                    ),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+
+                                  //Dialog Main Title
+                                  title: Column(
+                                    children: <Widget>[
+                                      new Text(
+                                        "작성하기",
+                                        style:
+                                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  content: StatefulBuilder(
+                                      builder: (BuildContext context, StateSetter setState) {
+                                        return Container(
+                                          height: 180,
+                                          child: Column(
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  Icon(Icons.calendar_month_outlined, color: Colors.white, size: 17,),
+                                                  SizedBox(width: 8,),
+                                                  InkWell(
+                                                    onTap: () async{
+                                                      newdate = await showDatePicker(
+                                                        context: context,
+                                                        initialDate: DateTime.now(),
+                                                        firstDate: DateTime(1900),
+                                                        lastDate: DateTime(2100),
+                                                      );
+
+                                                      if(newdate == null){
+                                                        return;
+                                                      }
+                                                      else{
+
+                                                      }
+
+                                                    },
+                                                    child: Text(DateFormat("yyyy년 MM월 dd일").format(newdate!),
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 14
+                                                      ),
+                                                    ),
+                                                  ),
+
+
+
+                                                ],
+                                              ),
+
+                                              SizedBox(height: 15,),
+
+                                              TextFormField(
+                                                controller: _contentController,
+                                                minLines: 3,
+                                                maxLines: 3,
+                                                keyboardType: TextInputType.multiline,
+                                                cursorColor: Colors.white,
+                                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14),
+                                                decoration: InputDecoration(
+                                                  // icon: Icon(Icons.note_add_outlined),
+                                                  //   suffixIcon: Icon(Icons.account_circle_outlined, color: Colors.white,),
+                                                    fillColor: Colors.transparent,
+                                                    isDense: true,
+                                                    contentPadding: EdgeInsets.all(15),
+                                                    filled: true,
+                                                    enabledBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.all(
+                                                        Radius.circular(15),
+                                                      ),
+                                                      borderSide: BorderSide(color:Colors.white, width: 0),
+                                                    ),
+                                                    // helperText: '',
+                                                    hintText: '내용을 입력하세요',
+                                                    floatingLabelStyle: TextStyle(color:Colors.white),
+                                                    hintStyle: TextStyle(fontSize: 12, color: Colors.grey),
+                                                    labelText: '내용',
+                                                    labelStyle: TextStyle(fontSize: 12,  color: Colors.grey),
+                                                    focusedBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                                                      borderSide: BorderSide(
+                                                          color: Colors.white, width: 1.5),
+                                                    )
+                                                ),
+                                                validator: (value) {
+                                                  if (value!.isEmpty) {
+                                                    return "내용을 입력해주세요";
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+
+
+                                                  SizedBox(
+                                                    height:30,
+                                                    child: FittedBox(
+                                                      fit: BoxFit.fill,
+                                                      child: Switch(
+                                                        value: _isChecked,
+                                                        activeTrackColor: Colors.transparent,
+                                                        inactiveTrackColor: Colors.transparent,
+                                                        trackOutlineColor: MaterialStateProperty.all<Color>(Colors.white),
+                                                        trackOutlineWidth: MaterialStateProperty.all(0.5),
+                                                        inactiveThumbColor: Colors.white.withOpacity(0.5),
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            _isChecked = value;
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 10,),
+                                                  Text(_isChecked?'공개':'비공개',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 14
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
                                             ],
                                           ),
+                                        );
+                                      }
+                                  ),
+                                  actionsAlignment: MainAxisAlignment.center,
+                                  actions: <Widget>[
+                                    new ElevatedButton(
+                                      child: new Text("완료", style: TextStyle(color: Colors.white),),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent),
+                                      onPressed: () async {
 
-                                        ],
-                                      ),
-                                    );
-                                  }
-                                ),
-                                actionsAlignment: MainAxisAlignment.center,
-                                actions: <Widget>[
-                                  new ElevatedButton(
-                                    child: new Text("완료", style: TextStyle(color: Colors.white),),
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                  new ElevatedButton(
-                                    child: new Text("닫기", style: TextStyle(color: Colors.white),),
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              )
-                          ),
-                        );
-                      }
-                  );
+                                        bool isCreated = await memoProvider.createMemo(userProvider.token, _contentController.text, !_isChecked, DateFormat("yyyy-MM-dd").format(newdate!));
+
+
+
+
+
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    new ElevatedButton(
+                                      child: new Text("닫기", style: TextStyle(color: Colors.white),),
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                )
+                            ),
+                          );
+                        }
+                    );
+
+
+
+                  }
 
                 },
                 child: Icon(Icons.edit_outlined, color: Colors.white, size: 20,),
@@ -416,12 +661,7 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                     return FloatingActionButton(
                       heroTag: 'login',
                       onPressed: () {
-
-
-
-
-
-                        if(true){
+                        if(userProvider.token != ""){
                           Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: MyPage()));
                         }
                         else{
@@ -589,18 +829,51 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                                             style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.transparent),
                                             onPressed: () async{
-                                              try {
+                                              // try {
+                                                print('login cliicked');
                                                 bool isToken = await userProvider.login(_idController.text, _pwController.text);
-                                                await userProvider.storeToken();
+                                                // print(userProvider.token);
 
-                                                if (userProvider.isTokenExpired()) {
-                                                  print('Token is expired');
-                                                } else {
-                                                  print('Token is valid');
+                                                if(isToken){
+                                                  Fluttertoast.showToast(
+                                                      msg: "로그인에 성공하였습니다",
+                                                      toastLength: Toast.LENGTH_SHORT,
+                                                      gravity: ToastGravity.CENTER,
+                                                      timeInSecForIosWeb: 1,
+                                                      webPosition: "center",
+                                                      // backgroundColor: Colors.white,
+                                                      webBgColor: "linear-gradient(to right, #4299f5, #4299f5, #4299f5)",
+                                                      textColor: Colors.white,
+                                                      fontSize: 16.0
+                                                  );
+
+                                                  Navigator.pop(context);
+                                                  Navigator.push(context, PageTransition(type: PageTransitionType.fade, child: MyPage()));
                                                 }
-                                              } catch (e) {
-                                                print('Error: $e');
-                                              }
+                                                else{
+                                                  Fluttertoast.showToast(
+                                                      msg: "로그인에 실패하였습니다",
+                                                      toastLength: Toast.LENGTH_SHORT,
+                                                      gravity: ToastGravity.CENTER,
+                                                      timeInSecForIosWeb: 1,
+                                                      webPosition: "center",
+                                                      // backgroundColor: Colors.white,
+                                                      webBgColor: "linear-gradient(to right, #f54242, #f54242, #f54242)",
+                                                      textColor: Colors.white,
+                                                      fontSize: 16.0
+                                                  );
+                                                }
+                                              //   await userProvider.storeToken();
+                                              //
+                                              //   if (userProvider.isTokenExpired()) {
+                                              //     print('Token is expired');
+                                              //   } else {
+                                              //     Navigator.pop(context);
+                                              //     print('Token is valid');
+                                              //   }
+                                              // } catch (e) {
+                                              //   print('Error: $e');
+                                              // }
                                             },
                                           ),
                                           new ElevatedButton(
@@ -660,6 +933,11 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
           return Container();
         },
         transitionBuilder: (context, a1, a2, widget){
+
+          final userProvider = Provider.of<UserProvider>(context);
+          final screenProvider = Provider.of<ScreenProvider>(context);
+          final memoProvider = Provider.of<MemoProvider>(context);
+
           return ScaleTransition(
             scale: Tween<double>(begin: 0.5, end: 1.0).animate(a1),
             child: FadeTransition(
@@ -907,7 +1185,37 @@ class _MainPageState extends State<MainPage> with SingleTickerProviderStateMixin
                       child: new Text("회원가입", style: TextStyle(color: Colors.white),),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent),
-                      onPressed: () {
+                      onPressed: () async {
+
+                        bool isRegistered = await userProvider.register(_regiIDController.text, _regiPWPWController.text, _regiEMAILController.text);
+                        if(isRegistered){
+                          Fluttertoast.showToast(
+                              msg: "회원가입에 성공하였습니다. 다시 로그인 해주세요.",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              webPosition: "center",
+                              // backgroundColor: Colors.white,
+                              webBgColor: "linear-gradient(to right, #4299f5, #4299f5, #4299f5)",
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );
+
+                          Navigator.pop(context);
+                        }
+                        else{
+                          Fluttertoast.showToast(
+                              msg: "회원가입에 실패하였습니다",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              timeInSecForIosWeb: 1,
+                              webPosition: "center",
+                              // backgroundColor: Colors.white,
+                              webBgColor: "linear-gradient(to right, #f54242, #f54242, #f54242)",
+                              textColor: Colors.white,
+                              fontSize: 16.0
+                          );
+                        }
                         Navigator.pop(context);
                       },
                     ),

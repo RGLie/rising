@@ -34,8 +34,8 @@ class UserProvider with ChangeNotifier{
             "email": email
           });
 
-      _myuser = User.fromJson(response.data['user']);
-      _token = response.data['token'];
+      // _myuser = User.fromJson(response.data['user']);
+      // _token = response.data['token'];
 
 
       notifyListeners();
@@ -55,6 +55,7 @@ class UserProvider with ChangeNotifier{
   Future<bool> login(String userName , String password) async{
     var dio = Dio();
     try {
+      print('login dio');
       final response = await dio.post(
           API_LOGIN_URL,
           data: {
@@ -63,7 +64,7 @@ class UserProvider with ChangeNotifier{
           });
 
       _myuser = User.fromJson(response.data['user']);
-      _token = response.data['token'];
+      _token = response.data['token'].toString();
 
 
       notifyListeners();

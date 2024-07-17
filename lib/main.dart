@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:madcamp_week3/ball_simulation.dart';
 import 'package:madcamp_week3/home_page.dart';
 import 'package:madcamp_week3/main_page.dart';
+import 'package:madcamp_week3/model/memo_provider.dart';
 import 'package:madcamp_week3/model/screen_provider.dart';
 import 'package:madcamp_week3/model/user_provider.dart';
 import 'package:madcamp_week3/object/moon.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => ScreenProvider()),
+        ChangeNotifierProvider(create: (context) => MemoProvider()),
       ],
       child: MaterialApp(
         theme: ThemeData(

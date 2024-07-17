@@ -10,6 +10,9 @@ class ScreenProvider with ChangeNotifier{
   String _myCardText = "";
   String get myCardText => _myCardText;
 
+  String _myCardDate = "";
+  String get myCardDate => _myCardDate;
+
   void setClicked(){
     _isClicked = true;
     notifyListeners();
@@ -28,6 +31,12 @@ class ScreenProvider with ChangeNotifier{
 
   void setMyCardText(String text){
     _myCardText = text;
+    notifyListeners();
+  }
+
+
+  void setMyCardDate(String text){
+    _myCardDate = text;
     notifyListeners();
   }
 

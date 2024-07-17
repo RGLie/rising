@@ -5,8 +5,9 @@ import '../model/screen_provider.dart';
 
 class MyCard extends StatelessWidget {
   final String text;
+  final String date;
 
-  const MyCard({super.key, required this.text});
+  const MyCard({super.key, required this.text, required this.date});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +34,7 @@ class MyCard extends StatelessWidget {
           onTap: () {
             screenProvider.setMyCardClicked();
             screenProvider.setMyCardText(text);
+            screenProvider.setMyCardDate(date);
 
             // Navigator.push(
             //     context,
@@ -53,7 +55,7 @@ class MyCard extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                '2029년 2월 3일',
+                date,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                     fontSize: 14,
